@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#0b1f33">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Trains Monaco">
+  <title>Trains Menton ↔ Monaco</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background: #07131f;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      box-sizing: border-box;
+      padding: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    .app {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-align-items: center;
+      align-items: center;
+      -webkit-justify-content: space-between;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .title {
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1.05;
+    }
+
+    .clock {
+      font-size: 28px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .route-card {
+      background: #10283f;
+      border: 1px solid #234664;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+
+    .route {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .subline {
+      color: #b9c9d7;
+      font-size: 16px;
+    }
+
+    .toolbar {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-flex-wrap: wrap;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 14px;
+    }
+
+    button {
+      -webkit-appearance: none;
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 15px;
+      font-size: 16px;
+      font-weight: 700;
+      background: #244967;
+      color: #ffffff;
+    }
+
+    button.active {
+      background: #ffffff;
+      color: #07131f;
+    }
+
+    .status {
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      background: #10283f;
+      color: #d5e2ec;
+      font-size: 15px;
+    }
+
+    .status.error {
+      background: #4a1515;
+      color: #ffd7d7;
+    }
+
+    .train {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-align-items: center;
+      align-items: center;
+      -webkit-justify-content: space-between;
+      justify-content: space-between;
+      background: #ffffff;
+      color: #07131f;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      min-height: 86px;
+    }
+
+    .times {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-align-items: center;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .dep {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .arrow {
+      font-size: 26px;
+      color: #687887;
+    }
+
+    .arr {
+      font-size: 25px;
+      font-weight: 700;
+      color: #30485c;
+    }
+
+    .meta {
+      text-align: right;
+      margin-left: 12px;
+    }
+
+    .line {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .delay {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 800;
+      background: #dff4e5;
+      color: #15652b;
+    }
+
+    .delay.late {
+      background: #ffe2d8;
+      color: #9e2c0d;
+    }
+
+    .delay.warn {
+      background: #fff0c2;
+      color: #795b00;
+    }
+
+    .next {
+      border: 4px solid #55d98a;
+      padding: 10px 12px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 35px 10px;
+      color: #b9c9d7;
+      font-size: 20px;
+    }
+
+    .footer {
+      color: #8fa7b8;
+      font-size: 13px;
+      text-align: center;
+      padding: 10px 0 4px;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      .title { font-size: 24px; }
+      .clock { font-size: 22px; }
+      .route { font-size: 22px; }
+      .dep { font-size: 32px; }
+      .arr { font-size: 21px; }
+      .line { font-size: 15px; }
+      .train { min-height: 76px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="title">Trains Menton ↔ Monaco</div>
+      <div class="clock" id="clock">--:--</div>
+    </div>
+
+    <div class="route-card">
+      <div class="route" id="routeTitle">Chargement…</div>
+      <div class="subline" id="periodText">Mise à jour automatique toutes les 60 secondes</div>
+    </div>
+
+    <div class="toolbar">
+      <button id="autoBtn" class="active" onclick="setMode('auto')">Auto</button>
+      <button id="morningBtn" onclick="setMode('morning')">Matin</button>
+      <button id="eveningBtn" onclick="setMode('evening')">Soir</button>
+      <button onclick="loadTrains(true)">Actualiser</button>
+    </div>
+
+    <div class="status" id="status">Connexion au service SNCF…</div>
+    <div id="trains"></div>
+
+    <div class="footer">
+      Données SNCF • Actualisation automatique toutes les 60 s
+    </div>
+  </div>
+
+<script>
+(function () {
+  var API_BASE = "https://trainmonaco.markrusten-e08.workers.dev";
+  var mode = "auto";
+  var loading = false;
+  var lastData = null;
+
+  function pad(n) {
+    return n < 10 ? "0" + n : "" + n;
+  }
+
+  function nowParts() {
+    var d = new Date();
+    return { h: d.getHours(), m: d.getMinutes() };
+  }
+
+  function currentMinutes() {
+    var p = nowParts();
+    return p.h * 60 + p.m;
+  }
+
+  function effectiveMode() {
+    if (mode !== "auto") return mode;
+    return currentMinutes() < 12 * 60 ? "morning" : "evening";
+  }
+
+  function modeConfig() {
+    var m = effectiveMode();
+    if (m === "morning") {
+      return {
+        direction: "aller",
+        from: "Menton",
+        to: "Monaco-Monte-Carlo",
+        start: 7 * 60,
+        end: 9 * 60
+      };
+    }
+    return {
+      direction: "retour",
+      from: "Monaco-Monte-Carlo",
+      to: "Menton",
+      start: 17 * 60,
+      end: 20 * 60
+    };
+  }
+
+  function updateClock() {
+    var d = new Date();
+    document.getElementById("clock").innerHTML = pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+
+  function setStatus(text, isError) {
+    var el = document.getElementById("status");
+    el.innerHTML = text;
+    el.className = isError ? "status error" : "status";
+  }
+
+  function setActiveButtons() {
+    document.getElementById("autoBtn").className = mode === "auto" ? "active" : "";
+    document.getElementById("morningBtn").className = mode === "morning" ? "active" : "";
+    document.getElementById("eveningBtn").className = mode === "evening" ? "active" : "";
+  }
+
+  window.setMode = function (newMode) {
+    mode = newMode;
+    setActiveButtons();
+    loadTrains(true);
+  };
+
+  function navitiaToTime(v) {
+    if (!v || v.length < 13) return "--:--";
+    return v.substr(9, 2) + ":" + v.substr(11, 2);
+  }
+
+  function timeToMinutes(v) {
+    if (!v || v.length < 13) return -1;
+    return parseInt(v.substr(9, 2), 10) * 60 + parseInt(v.substr(11, 2), 10);
+  }
+
+  function escapeHtml(s) {
+    s = String(s == null ? "" : s);
+    return s.replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+  }
+
+  function render(data) {
+    var cfg = modeConfig();
+    var title = cfg.from + " → " + cfg.to;
+    document.getElementById("routeTitle").innerHTML = title;
+    document.getElementById("periodText").innerHTML =
+      (effectiveMode() === "morning" ? "Matin • 07:00 à 09:00" : "Soir • 17:00 à 20:00") +
+      " • actualisation toutes les 60 secondes";
+
+    var src = data && data.trains ? data.trains : [];
+    var list = [];
+    var i, t, mins;
+
+    for (i = 0; i < src.length; i++) {
+      t = src[i];
+      mins = timeToMinutes(t.departure);
+      if (mins >= cfg.start && mins <= cfg.end) list.push(t);
+    }
+
+    list.sort(function(a, b) {
+      return timeToMinutes(a.departure) - timeToMinutes(b.departure);
+    });
+
+    var now = currentMinutes();
+    var nextIndex = -1;
+    for (i = 0; i < list.length; i++) {
+      if (timeToMinutes(list[i].departure) >= now) {
+        nextIndex = i;
+        break;
+      }
+    }
+
+    var html = "";
+    for (i = 0; i < list.length; i++) {
+      t = list[i];
+      var delay = parseInt(t.delayMinutes || 0, 10);
+      var delayText = "À l'heure";
+      var delayClass = "delay";
+
+      if (delay > 0 && delay < 5) {
+        delayText = "+" + delay + " min";
+        delayClass += " warn";
+      } else if (delay >= 5) {
+        delayText = "+" + delay + " min";
+        delayClass += " late";
+      } else if (delay < 0) {
+        delayText = delay + " min";
+      }
+
+      var trainClass = "train";
+      if (i === nextIndex) trainClass += " next";
+
+      html += '<div class="' + trainClass + '">';
+      html +=   '<div class="times">';
+      html +=     '<div class="dep">' + navitiaToTime(t.departure) + '</div>';
+      html +=     '<div class="arrow">→</div>';
+      html +=     '<div class="arr">' + navitiaToTime(t.arrival) + '</div>';
+      html +=   '</div>';
+      html +=   '<div class="meta">';
+      html +=     '<div class="line">' + escapeHtml(t.line || t.number || "TER") + '</div>';
+      html +=     '<div class="' + delayClass + '">' + delayText + '</div>';
+      html +=   '</div>';
+      html += '</div>';
+    }
+
+    if (!list.length) {
+      html = '<div class="empty">Aucun train trouvé dans cette plage horaire.</div>';
+    }
+
+    document.getElementById("trains").innerHTML = html;
+
+    var d = new Date();
+    setStatus("Dernière mise à jour : " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds()), false);
+  }
+
+  window.loadTrains = function (force) {
+    if (loading) return;
+    loading = true;
+
+    var cfg = modeConfig();
+    document.getElementById("routeTitle").innerHTML = cfg.from + " → " + cfg.to;
+    setStatus("Mise à jour des horaires…", false);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", API_BASE + "/trains?direction=" + encodeURIComponent(cfg.direction) + "&_=" + new Date().getTime(), true);
+    xhr.timeout = 20000;
+
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) return;
+      loading = false;
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          if (data.ok === false) {
+            setStatus("Erreur SNCF : " + escapeHtml(data.error || "inconnue"), true);
+            return;
+          }
+          lastData = data;
+          render(data);
+        } catch (e) {
+          setStatus("Réponse du serveur illisible.", true);
+        }
+      } else {
+        setStatus("Impossible de joindre le serveur (" + xhr.status + ").", true);
+      }
+    };
+
+    xhr.ontimeout = function () {
+      loading = false;
+      setStatus("La connexion a pris trop de temps.", true);
+    };
+
+    xhr.onerror = function () {
+      loading = false;
+      setStatus("Erreur réseau. Nouvelle tentative dans une minute.", true);
+    };
+
+    xhr.send(null);
+  };
+
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  loadTrains(true);
+  setInterval(function () {
+    loadTrains(false);
+  }, 60000);
+
+  /* Sur les navigateurs récents, enregistre le service worker.
+     Sur un ancien iPad, l'application reste utilisable sans lui. */
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js");
+  }
+})();
+</script>
+</body>
+</html>

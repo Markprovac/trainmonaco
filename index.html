@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Trains Monaco">
-  <title>Trains Menton ↔ Monaco</title>
+  <title>Tableau de bord Menton Monaco</title>
 
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -56,6 +56,72 @@
       font-size: 28px;
       font-weight: 700;
       white-space: nowrap;
+    }
+
+    .date {
+      color: #9fb4c4;
+      font-size: 15px;
+      margin-top: 5px;
+    }
+
+    .weather-grid {
+      display: -webkit-flex;
+      display: flex;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .weather-card {
+      -webkit-flex: 1;
+      flex: 1;
+      background: #10283f;
+      border: 1px solid #234664;
+      border-radius: 14px;
+      padding: 14px 16px;
+      min-width: 0;
+    }
+
+    .weather-city {
+      font-size: 19px;
+      font-weight: 700;
+      color: #dbe7f0;
+    }
+
+    .weather-main {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-align-items: center;
+      align-items: center;
+      gap: 10px;
+      margin: 5px 0;
+    }
+
+    .weather-icon {
+      font-size: 38px;
+      line-height: 1;
+    }
+
+    .weather-temp {
+      font-size: 38px;
+      font-weight: 800;
+    }
+
+    .weather-desc {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .weather-extra {
+      color: #b9c9d7;
+      font-size: 14px;
+    }
+
+    .weather-updated {
+      color: #8fa7b8;
+      font-size: 13px;
+      text-align: right;
+      margin: 0 2px 10px;
     }
 
     .route-card {
@@ -216,15 +282,48 @@
       .arr { font-size: 21px; }
       .line { font-size: 15px; }
       .train { min-height: 76px; }
+      .weather-grid { gap: 8px; }
+      .weather-card { padding: 11px 12px; }
+      .weather-temp { font-size: 31px; }
+      .weather-icon { font-size: 31px; }
+      .weather-city { font-size: 17px; }
+      .weather-extra { font-size: 12px; }
     }
   </style>
 </head>
 <body>
   <div class="app">
     <div class="topbar">
-      <div class="title">Trains Menton ↔ Monaco</div>
+      <div>
+        <div class="title">Tableau de bord</div>
+        <div class="date" id="dateText">--</div>
+      </div>
       <div class="clock" id="clock">--:--</div>
     </div>
+
+    <div class="weather-grid">
+      <div class="weather-card">
+        <div class="weather-city">Menton</div>
+        <div class="weather-main">
+          <span class="weather-icon" id="mentonIcon">☀️</span>
+          <span class="weather-temp" id="mentonTemp">--°</span>
+        </div>
+        <div class="weather-desc" id="mentonDesc">Chargement météo…</div>
+        <div class="weather-extra" id="mentonExtra">Vent -- • Pluie 1 h --</div>
+      </div>
+
+      <div class="weather-card">
+        <div class="weather-city">Monaco</div>
+        <div class="weather-main">
+          <span class="weather-icon" id="monacoIcon">☀️</span>
+          <span class="weather-temp" id="monacoTemp">--°</span>
+        </div>
+        <div class="weather-desc" id="monacoDesc">Chargement météo…</div>
+        <div class="weather-extra" id="monacoExtra">Vent -- • Pluie 1 h --</div>
+      </div>
+    </div>
+
+    <div class="weather-updated" id="weatherUpdated">Météo : chargement…</div>
 
     <div class="route-card">
       <div class="route" id="routeTitle">Chargement…</div>
@@ -453,8 +552,127 @@
     xhr.send(null);
   };
 
+
+  function updateDateText() {
+    var d = new Date();
+    var days = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+    var months = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+    document.getElementById("dateText").innerHTML =
+      days[d.getDay()] + " " + d.getDate() + " " + months[d.getMonth()];
+  }
+
+  function weatherLabel(code) {
+    code = parseInt(code, 10);
+    if (code === 0) return { icon: "☀️", text: "Ciel dégagé" };
+    if (code === 1 || code === 2) return { icon: "🌤️", text: "Éclaircies" };
+    if (code === 3) return { icon: "☁️", text: "Couvert" };
+    if (code === 45 || code === 48) return { icon: "🌫️", text: "Brouillard" };
+    if (code === 51 || code === 53 || code === 55 || code === 56 || code === 57) return { icon: "🌦️", text: "Bruine" };
+    if (code === 61 || code === 63 || code === 65 || code === 66 || code === 67) return { icon: "🌧️", text: "Pluie" };
+    if (code === 71 || code === 73 || code === 75 || code === 77) return { icon: "❄️", text: "Neige" };
+    if (code === 80 || code === 81 || code === 82) return { icon: "🌦️", text: "Averses" };
+    if (code === 85 || code === 86) return { icon: "🌨️", text: "Averses de neige" };
+    if (code === 95 || code === 96 || code === 99) return { icon: "⛈️", text: "Orage" };
+    return { icon: "🌡️", text: "Météo actuelle" };
+  }
+
+  function getNextHourRain(data) {
+    try {
+      var hourly = data.hourly;
+      if (!hourly || !hourly.time) return "--";
+      var now = new Date();
+      var best = -1;
+      var i;
+      for (i = 0; i < hourly.time.length; i++) {
+        var t = new Date(hourly.time[i]);
+        if (t >= now) { best = i; break; }
+      }
+      if (best < 0) return "--";
+
+      var prob = hourly.precipitation_probability && hourly.precipitation_probability[best];
+      var rain = hourly.precipitation && hourly.precipitation[best];
+
+      if (prob != null) return Math.round(prob) + "%";
+      if (rain != null) return rain + " mm";
+      return "--";
+    } catch (e) {
+      return "--";
+    }
+  }
+
+  function renderWeather(prefix, data) {
+    if (!data || !data.current_weather) return;
+
+    var cw = data.current_weather;
+    var info = weatherLabel(cw.weathercode);
+    var rain1h = getNextHourRain(data);
+
+    document.getElementById(prefix + "Icon").innerHTML = info.icon;
+    document.getElementById(prefix + "Temp").innerHTML = Math.round(cw.temperature) + "°";
+    document.getElementById(prefix + "Desc").innerHTML = info.text;
+
+    var wind = cw.windspeed != null ? Math.round(cw.windspeed) + " km/h" : "--";
+    document.getElementById(prefix + "Extra").innerHTML =
+      "Vent " + wind + " • Pluie 1 h " + rain1h;
+  }
+
+  function loadWeatherFor(prefix, latitude, longitude, callback) {
+    var weatherUrl =
+      "https://api.open-meteo.com/v1/forecast" +
+      "?latitude=" + encodeURIComponent(latitude) +
+      "&longitude=" + encodeURIComponent(longitude) +
+      "&current_weather=true" +
+      "&hourly=precipitation_probability,precipitation" +
+      "&forecast_days=1" +
+      "&timezone=Europe%2FParis";
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", weatherUrl, true);
+    xhr.timeout = 15000;
+
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) return;
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          renderWeather(prefix, JSON.parse(xhr.responseText));
+        } catch (e) {}
+      }
+      if (callback) callback();
+    };
+
+    xhr.onerror = function () {
+      if (callback) callback();
+    };
+
+    xhr.ontimeout = function () {
+      if (callback) callback();
+    };
+
+    xhr.send(null);
+  }
+
+  function loadWeather() {
+    var done = 0;
+    function finished() {
+      done++;
+      if (done >= 2) {
+        var d = new Date();
+        document.getElementById("weatherUpdated").innerHTML =
+          "Météo actualisée à " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+      }
+    }
+
+    loadWeatherFor("menton", 43.7765, 7.5043, finished);
+    loadWeatherFor("monaco", 43.7384, 7.4246, finished);
+  }
+
   updateClock();
+  updateDateText();
   setInterval(updateClock, 1000);
+  setInterval(updateDateText, 60000);
+
+  loadWeather();
+  setInterval(loadWeather, 600000);
 
   loadTrains(true);
 

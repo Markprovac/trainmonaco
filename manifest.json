@@ -1,6 +1,6 @@
 {
-  "name": "Trains Menton Monaco",
-  "short_name": "Trains Monaco",
+  "name": "Tableau de bord Menton Monaco",
+  "short_name": "Menton Monaco",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#07131f",

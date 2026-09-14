@@ -228,7 +228,7 @@
 
     <div class="route-card">
       <div class="route" id="routeTitle">Chargement…</div>
-      <div class="subline" id="periodText">Mise à jour automatique toutes les 60 secondes</div>
+      <div class="subline" id="periodText">Mise à jour automatique toutes les 60 s uniquement de 07:00 à 09:00 et de 17:00 à 20:00</div>
     </div>
 
     <div class="toolbar">
@@ -242,7 +242,7 @@
     <div id="trains"></div>
 
     <div class="footer">
-      Données SNCF • Actualisation automatique toutes les 60 s
+      Données SNCF • Auto : 07:00–09:00 et 17:00–20:00
     </div>
   </div>
 
@@ -457,9 +457,20 @@
   setInterval(updateClock, 1000);
 
   loadTrains(true);
-  setInterval(function () {
-    loadTrains(false);
-  }, 60000);
+
+  function autoRefreshIfNeeded() {
+    var d = new Date();
+    var minutes = d.getHours() * 60 + d.getMinutes();
+
+    var morningWindow = minutes >= 7 * 60 && minutes < 9 * 60;
+    var eveningWindow = minutes >= 17 * 60 && minutes < 20 * 60;
+
+    if (morningWindow || eveningWindow) {
+      loadTrains(false);
+    }
+  }
+
+  setInterval(autoRefreshIfNeeded, 60000);
 
   /* Sur les navigateurs récents, enregistre le service worker.
      Sur un ancien iPad, l'application reste utilisable sans lui. */

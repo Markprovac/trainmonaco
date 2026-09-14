@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#0b1f33">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Trains Monaco">
+  <title>Tableau de bord Menton Monaco</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      background: #07131f;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      box-sizing: border-box;
+      padding: 10px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: auto;
+    }
+
+    * { box-sizing: border-box; }
+
+    .app {
+      width: 100%;
+      min-height: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      display: -webkit-flex;
+      display: flex;
+      -webkit-flex-direction: column;
+      flex-direction: column;
+      overflow: visible;
+    }
+
+    .topbar {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-align-items: center;
+      align-items: center;
+      -webkit-justify-content: space-between;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 7px;
+    }
+
+    .title {
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1.05;
+    }
+
+    .clock {
+      font-size: 28px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .date {
+      color: #9fb4c4;
+      font-size: 15px;
+      margin-top: 5px;
+    }
+
+    .weather-grid {
+      display: -webkit-flex;
+      display: flex;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .weather-card {
+      -webkit-flex: 1;
+      flex: 1;
+      background: #10283f;
+      border: 1px solid #234664;
+      border-radius: 14px;
+      padding: 7px 10px;
+      min-width: 0;
+    }
+
+    .weather-city {
+      font-size: 19px;
+      font-weight: 700;
+      color: #dbe7f0;
+    }
+
+    .weather-main {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-align-items: center;
+      align-items: center;
+      gap: 10px;
+      margin: 5px 0;
+    }
+
+    .weather-icon {
+      font-size: 38px;
+      line-height: 1;
+    }
+
+    .weather-temp {
+      font-size: 38px;
+      font-weight: 800;
+    }
+
+    .weather-desc {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .weather-extra {
+      color: #b9c9d7;
+      font-size: 14px;
+    }
+
+    .weather-updated {
+      color: #8fa7b8;
+      font-size: 13px;
+      text-align: right;
+      margin: 0 2px 10px;
+    }
+
+    .route-card {
+      background: #10283f;
+      border: 1px solid #234664;
+      border-radius: 14px;
+      padding: 7px 10px;
+      margin-bottom: 7px;
+    }
+
+    .route {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .subline {
+      color: #b9c9d7;
+      font-size: 16px;
+    }
+
+    .toolbar {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-flex-wrap: wrap;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 6px 0 8px;
+    }
+
+    button {
+      -webkit-appearance: none;
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 15px;
+      font-size: 16px;
+      font-weight: 700;
+      background: #244967;
+      color: #ffffff;
+    }
+
+    button.active {
+      background: #ffffff;
+      color: #07131f;
+    }
+
+    .status {
+      border-radius: 10px;
+      padding: 7px 10px;
+      margin-bottom: 6px;
+      background: #10283f;
+      color: #d5e2ec;
+      font-size: 15px;
+    }
+
+    .status.error {
+      background: #4a1515;
+      color: #ffd7d7;
+    }
+
+    .train {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-align-items: center;
+      align-items: center;
+      -webkit-justify-content: space-between;
+      justify-content: space-between;
+      background: #ffffff;
+      color: #07131f;
+      border-radius: 14px;
+      padding: 7px 10px;
+      margin-bottom: 6px;
+      min-height: 58px;
+    }
+
+    .times {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-align-items: center;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .dep {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .arrow {
+      font-size: 26px;
+      color: #687887;
+    }
+
+    .arr {
+      font-size: 25px;
+      font-weight: 700;
+      color: #30485c;
+    }
+
+    .meta {
+      text-align: right;
+      margin-left: 12px;
+    }
+
+    .line {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .delay {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 800;
+      background: #dff4e5;
+      color: #15652b;
+    }
+
+    .delay.late {
+      background: #ffe2d8;
+      color: #9e2c0d;
+    }
+
+    .delay.warn {
+      background: #fff0c2;
+      color: #795b00;
+    }
+
+    .next {
+      border: 4px solid #55d98a;
+      padding: 7px 10px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 35px 10px;
+      color: #b9c9d7;
+      font-size: 20px;
+    }
+
+    .footer {
+      color: #8fa7b8;
+      font-size: 13px;
+      text-align: center;
+      padding: 10px 0 4px;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      .title { font-size: 24px; }
+      .clock { font-size: 22px; }
+      .route { font-size: 22px; }
+      .dep { font-size: 32px; }
+      .arr { font-size: 21px; }
+      .line { font-size: 15px; }
+      .train { min-height: 76px; }
+      .weather-grid { gap: 8px; }
+      .weather-card { padding: 11px 12px; }
+      .weather-temp { font-size: 31px; }
+      .weather-icon { font-size: 31px; }
+      .weather-city { font-size: 17px; }
+      .weather-extra { font-size: 12px; }
+    }
+  
+    #trains {
+      display: -webkit-grid;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      min-height: 0;
+      overflow: visible;
+      align-content: start;
+    }
+
+    .train {
+      margin-bottom: 0;
+    }
+
+
+    /* Tablettes et téléphones en paysage : 2 colonnes pour les trains */
+    @media (orientation: landscape) and (min-width: 700px) {
+      #trains {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Téléphones */
+    @media (max-width: 699px) {
+      body { padding: 7px; }
+      .topbar { margin-bottom: 5px; }
+      .title { font-size: 20px; }
+      .clock { font-size: 22px; }
+      .date { font-size: 12px; margin-top: 2px; }
+
+      .weather-grid { gap: 6px; margin-bottom: 4px; }
+      .weather-card { padding: 8px 9px; border-radius: 10px; }
+      .weather-city { font-size: 14px; }
+      .weather-main { gap: 5px; margin: 2px 0; }
+      .weather-icon { font-size: 25px; }
+      .weather-temp { font-size: 27px; }
+      .weather-desc { font-size: 12px; margin-bottom: 2px; }
+      .weather-extra { font-size: 10px; }
+      .weather-updated { font-size: 10px; margin-bottom: 4px; }
+
+      .route-card { padding: 7px 9px; margin-bottom: 5px; border-radius: 10px; }
+      .route { font-size: 17px; margin-bottom: 2px; }
+      .subline { font-size: 11px; }
+
+      .toolbar { gap: 5px; margin: 4px 0 6px; }
+      button { padding: 7px 9px; font-size: 12px; border-radius: 8px; }
+
+      .status { padding: 6px 8px; margin-bottom: 5px; font-size: 11px; }
+
+      #trains { gap: 4px; }
+      .train { min-height: 48px; padding: 6px 8px; border-radius: 9px; }
+      .dep { font-size: 25px; }
+      .arrow { font-size: 16px; }
+      .arr { font-size: 17px; }
+      .line { font-size: 12px; }
+      .delay { margin-top: 2px; padding: 3px 6px; font-size: 10px; }
+
+      .footer { font-size: 9px; padding: 3px 0 0; }
+    }
+
+    /* Téléphones en paysage très bas : encore plus compact */
+    @media (orientation: landscape) and (max-height: 500px) {
+      body { padding: 5px; }
+      .title { font-size: 17px; }
+      .clock { font-size: 18px; }
+      .date { display: none; }
+
+      .weather-card { padding: 5px 7px; }
+      .weather-city { font-size: 12px; }
+      .weather-icon { font-size: 20px; }
+      .weather-temp { font-size: 22px; }
+      .weather-desc { font-size: 10px; }
+      .weather-extra { font-size: 9px; }
+      .weather-updated { display: none; }
+
+      .route-card { padding: 5px 7px; }
+      .route { font-size: 14px; }
+      .subline { font-size: 9px; }
+
+      .toolbar { margin: 3px 0 4px; }
+      button { padding: 5px 7px; font-size: 10px; }
+
+      .status { padding: 4px 6px; font-size: 9px; margin-bottom: 4px; }
+
+      #trains {
+        grid-template-columns: 1fr 1fr;
+        gap: 3px 5px;
+      }
+
+      .train { min-height: 38px; padding: 4px 6px; }
+      .dep { font-size: 20px; }
+      .arr { font-size: 14px; }
+      .arrow { font-size: 13px; }
+      .line { font-size: 10px; }
+      .delay { font-size: 9px; padding: 2px 4px; }
+      .footer { display: none; }
+    }
+
+    /* Ancien iPad portrait */
+    @media (min-width: 700px) and (orientation: portrait) {
+      .title { font-size: 26px; }
+      .clock { font-size: 26px; }
+      .weather-card { padding: 10px 12px; }
+      .weather-temp { font-size: 34px; }
+      .route { font-size: 22px; }
+      .train { min-height: 54px; }
+      .dep { font-size: 31px; }
+      .arr { font-size: 21px; }
+    }
+
+  
+    .next-train-card {
+      background: #ffffff;
+      color: #07131f;
+      border-radius: 14px;
+      padding: 10px 14px;
+      margin-bottom: 6px;
+      border-left: 7px solid #55d98a;
+      flex: 0 0 auto;
+    }
+
+    .next-label {
+      font-size: 12px;
+      font-weight: 800;
+      color: #2c6c46;
+      letter-spacing: .7px;
+      margin-bottom: 2px;
+    }
+
+    .next-main {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-align-items: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .next-time {
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .next-arrow {
+      font-size: 24px;
+      color: #647789;
+    }
+
+    .next-arrival {
+      font-size: 27px;
+      font-weight: 700;
+      color: #30485c;
+    }
+
+    .next-meta {
+      margin-left: auto;
+      text-align: right;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .next-delay {
+      display: inline-block;
+      margin-top: 3px;
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: #dff4e5;
+      color: #15652b;
+    }
+
+    .next-delay.warn {
+      background: #fff0c2;
+      color: #795b00;
+    }
+
+    .next-delay.late {
+      background: #ffe2d8;
+      color: #9e2c0d;
+    }
+
+    /* Les autres trains sont une liste compacte qui s'adapte au nombre */
+    #trains {
+      grid-auto-rows: minmax(34px, auto);
+    }
+
+    #trains .train {
+      min-height: 0;
+      padding: 5px 8px;
+    }
+
+    #trains .dep { font-size: 24px; }
+    #trains .arr { font-size: 17px; }
+    #trains .arrow { font-size: 14px; }
+    #trains .line { font-size: 11px; }
+    #trains .delay { font-size: 9px; padding: 2px 5px; }
+
+    .app.dense .weather-card { padding-top: 6px; padding-bottom: 6px; }
+    .app.dense .weather-main { margin: 1px 0; }
+    .app.dense .weather-icon { font-size: 23px; }
+    .app.dense .weather-temp { font-size: 27px; }
+    .app.dense .weather-desc { font-size: 11px; }
+    .app.dense .weather-extra { font-size: 9px; }
+    .app.dense .route-card { padding-top: 5px; padding-bottom: 5px; }
+    .app.dense .route { font-size: 16px; }
+    .app.dense .subline { font-size: 9px; }
+    .app.dense .toolbar button { padding: 5px 7px; font-size: 10px; }
+    .app.dense .status { padding: 4px 6px; font-size: 9px; }
+    .app.dense .next-train-card { padding: 7px 10px; }
+    .app.dense .next-time { font-size: 34px; }
+    .app.dense .next-arrival { font-size: 22px; }
+    .app.dense #trains .train { padding: 4px 6px; }
+    .app.dense #trains .dep { font-size: 20px; }
+    .app.dense #trains .arr { font-size: 14px; }
+
+    .app.extra-dense .weather-updated { display:none; }
+    .app.extra-dense .subline { display:none; }
+    .app.extra-dense .footer { display:none; }
+    .app.extra-dense .weather-extra { display:none; }
+    .app.extra-dense .route-card { margin-bottom: 3px; }
+    .app.extra-dense .toolbar { margin: 2px 0 3px; }
+    .app.extra-dense .next-label { font-size: 9px; }
+    .app.extra-dense .next-time { font-size: 30px; }
+    .app.extra-dense .next-arrival { font-size: 19px; }
+
+    @media (orientation: landscape) and (min-width: 700px) {
+      .next-train-card {
+        margin-bottom: 4px;
+      }
+
+      #trains {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .next-time { font-size: 36px; }
+      .next-arrival { font-size: 23px; }
+    }
+
+    @media (max-width: 699px) {
+      .next-train-card { padding: 8px 10px; border-left-width: 5px; }
+      .next-label { font-size: 10px; }
+      .next-time { font-size: 34px; }
+      .next-arrival { font-size: 21px; }
+      .next-meta { font-size: 11px; }
+    }
+
+    @media (orientation: landscape) and (max-height: 500px) {
+      .next-train-card { padding: 5px 8px; }
+      .next-label { display:none; }
+      .next-time { font-size: 28px; }
+      .next-arrival { font-size: 18px; }
+      .next-meta { font-size: 10px; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div>
+        <div class="title">Tableau de bord</div>
+        <div class="date" id="dateText">--</div>
+      </div>
+      <div class="clock" id="clock">--:--</div>
+    </div>
+
+    <div class="weather-grid">
+      <div class="weather-card">
+        <div class="weather-city">Menton</div>
+        <div class="weather-main">
+          <span class="weather-icon" id="mentonIcon">☀️</span>
+          <span class="weather-temp" id="mentonTemp">--°</span>
+        </div>
+        <div class="weather-desc" id="mentonDesc">Chargement météo…</div>
+        <div class="weather-extra" id="mentonExtra">Vent -- • Pluie 1 h --</div>
+      </div>
+
+      <div class="weather-card">
+        <div class="weather-city">Monaco</div>
+        <div class="weather-main">
+          <span class="weather-icon" id="monacoIcon">☀️</span>
+          <span class="weather-temp" id="monacoTemp">--°</span>
+        </div>
+        <div class="weather-desc" id="monacoDesc">Chargement météo…</div>
+        <div class="weather-extra" id="monacoExtra">Vent -- • Pluie 1 h --</div>
+      </div>
+    </div>
+
+    <div class="weather-updated" id="weatherUpdated">Météo : chargement…</div>
+
+    <div class="route-card">
+      <div class="route" id="routeTitle">Chargement…</div>
+      <div class="subline" id="periodText">Mise à jour automatique toutes les 60 s uniquement de 07:00 à 09:00 et de 17:00 à 20:00</div>
+    </div>
+
+    <div class="toolbar">
+      <button id="autoBtn" class="active" onclick="setMode('auto')">Auto</button>
+      <button id="morningBtn" onclick="setMode('morning')">Matin</button>
+      <button id="eveningBtn" onclick="setMode('evening')">Soir</button>
+      <button onclick="loadTrains(true)">↻ Actualiser</button>
+    </div>
+
+    <div class="status" id="status">Connexion au service SNCF…</div>
+
+    <div id="nextTrainCard" class="next-train-card" style="display:none;">
+      <div class="next-label">PROCHAIN TRAIN</div>
+      <div class="next-main">
+        <div class="next-time" id="nextDep">--:--</div>
+        <div class="next-arrow">→</div>
+        <div class="next-arrival" id="nextArr">--:--</div>
+        <div class="next-meta">
+          <div id="nextLine">TER</div>
+          <div id="nextDelay" class="next-delay">À l'heure</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="trains"></div>
+
+    <div class="footer">
+      Données SNCF • prochain train en grand • mise à jour automatique
+    </div>
+  </div>
+
+<script>
+(function () {
+  var API_BASE = "https://trainmonaco.markrusten-e08.workers.dev";
+  var mode = "auto";
+  var loading = false;
+  var lastData = null;
+
+  function pad(n) {
+    return n < 10 ? "0" + n : "" + n;
+  }
+
+  function nowParts() {
+    var d = new Date();
+    return { h: d.getHours(), m: d.getMinutes() };
+  }
+
+  function currentMinutes() {
+    var p = nowParts();
+    return p.h * 60 + p.m;
+  }
+
+  function effectiveMode() {
+    if (mode !== "auto") return mode;
+    return currentMinutes() < 12 * 60 ? "morning" : "evening";
+  }
+
+  function modeConfig() {
+    var m = effectiveMode();
+    if (m === "morning") {
+      return {
+        direction: "aller",
+        from: "Menton",
+        to: "Monaco-Monte-Carlo",
+        start: 7 * 60,
+        end: 9 * 60
+      };
+    }
+    return {
+      direction: "retour",
+      from: "Monaco-Monte-Carlo",
+      to: "Menton",
+      start: 17 * 60,
+      end: 20 * 60
+    };
+  }
+
+  function updateClock() {
+    var d = new Date();
+    document.getElementById("clock").innerHTML = pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+
+  function setStatus(text, isError) {
+    var el = document.getElementById("status");
+    el.innerHTML = text;
+    el.className = isError ? "status error" : "status";
+  }
+
+  function setActiveButtons() {
+    document.getElementById("autoBtn").className = mode === "auto" ? "active" : "";
+    document.getElementById("morningBtn").className = mode === "morning" ? "active" : "";
+    document.getElementById("eveningBtn").className = mode === "evening" ? "active" : "";
+  }
+
+  window.setMode = function (newMode) {
+    mode = newMode;
+    setActiveButtons();
+    loadTrains(true);
+  };
+
+  function navitiaToTime(v) {
+    if (!v || v.length < 13) return "--:--";
+    return v.substr(9, 2) + ":" + v.substr(11, 2);
+  }
+
+  function timeToMinutes(v) {
+    if (!v || v.length < 13) return -1;
+    return parseInt(v.substr(9, 2), 10) * 60 + parseInt(v.substr(11, 2), 10);
+  }
+
+  function escapeHtml(s) {
+    s = String(s == null ? "" : s);
+    return s.replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+  }
+
+  function navitiaDateKey(v) {
+    // Exemple Navitia : 20260915T070200 -> 20260915
+    return (v && v.length >= 8) ? v.substr(0, 8) : "";
+  }
+
+  function localDateKey(offsetDays) {
+    var d = new Date();
+    if (offsetDays) d.setDate(d.getDate() + offsetDays);
+    return String(d.getFullYear()) + pad(d.getMonth() + 1) + pad(d.getDate());
+  }
+
+  function getDisplayedDayInfo(data, src) {
+    // Priorité aux infos du Worker, puis vérification avec la date réelle du train.
+    var tomorrow = !!(data && Number(data.dayOffset) > 0);
+
+    if (!tomorrow && src && src.length) {
+      var trainDate = navitiaDateKey(src[0].departure);
+      if (trainDate && trainDate === localDateKey(1)) tomorrow = true;
+    }
+
+    return {
+      tomorrow: tomorrow,
+      label: tomorrow ? "DEMAIN" : "AUJOURD’HUI"
+    };
+  }
+
+  function render(data) {
+    var cfg = modeConfig();
+    var title = cfg.from + " → " + cfg.to;
+    document.getElementById("routeTitle").innerHTML = title;
+
+    var src = data && data.trains ? data.trains : [];
+    var dayInfo = getDisplayedDayInfo(data, src);
+
+    document.getElementById("periodText").innerHTML =
+      (effectiveMode() === "morning" ? "Matin" : "Soir") +
+      " • <strong>" + dayInfo.label + "</strong> • " +
+      (effectiveMode() === "morning" ? "07:00 à 09:00" : "17:00 à 20:00") +
+      " • actualisation toutes les 60 secondes";
+    var list = [];
+    var i, t, mins;
+
+    for (i = 0; i < src.length; i++) {
+      t = src[i];
+      mins = timeToMinutes(t.departure);
+      if (mins >= cfg.start && mins <= cfg.end) list.push(t);
+    }
+
+    list.sort(function(a, b) {
+      return timeToMinutes(a.departure) - timeToMinutes(b.departure);
+    });
+
+    var now = currentMinutes();
+    var nextIndex = -1;
+    for (i = 0; i < list.length; i++) {
+      if (timeToMinutes(list[i].departure) >= now) {
+        nextIndex = i;
+        break;
+      }
+    }
+
+    /* Pendant la plage active, on retire les trains déjà partis.
+       En dehors de la plage (par ex. test manuel à midi), on conserve toute la plage. */
+    var isToday = !dayInfo.tomorrow;
+    var inActiveWindow = isToday && now >= cfg.start && now <= cfg.end;
+    var displayList = list;
+
+    if (inActiveWindow && nextIndex >= 0) {
+      displayList = list.slice(nextIndex);
+      nextIndex = 0;
+    }
+
+    /* Le premier train à venir devient la grande vignette. */
+    var featured = null;
+    if (displayList.length) {
+      if (inActiveWindow) {
+        featured = displayList[0];
+      } else if (nextIndex >= 0 && nextIndex < list.length) {
+        featured = list[nextIndex];
+      } else {
+        featured = displayList[0];
+      }
+    }
+
+    var card = document.getElementById("nextTrainCard");
+    if (featured) {
+      var fDelay = parseInt(featured.delayMinutes || 0, 10);
+      var fText = "À l'heure";
+      var fClass = "next-delay";
+
+      if (fDelay > 0 && fDelay < 5) {
+        fText = "+" + fDelay + " min";
+        fClass += " warn";
+      } else if (fDelay >= 5) {
+        fText = "+" + fDelay + " min";
+        fClass += " late";
+      } else if (fDelay < 0) {
+        fText = fDelay + " min";
+      }
+
+      document.querySelector(".next-label").innerHTML =
+        dayInfo.tomorrow ? "PROCHAIN TRAIN • DEMAIN" : "PROCHAIN TRAIN • AUJOURD’HUI";
+      document.getElementById("nextDep").innerHTML = navitiaToTime(featured.baseDeparture || featured.departure);
+      document.getElementById("nextArr").innerHTML = navitiaToTime(featured.baseArrival || featured.arrival);
+      document.getElementById("nextLine").innerHTML = escapeHtml(featured.line || featured.number || "TER");
+      document.getElementById("nextDelay").innerHTML = fText;
+      document.getElementById("nextDelay").className = fClass;
+      card.style.display = "block";
+    } else {
+      card.style.display = "none";
+    }
+
+    /* On affiche TOUS les autres trains. Aucun n'est volontairement masqué. */
+    var remaining = [];
+    for (i = 0; i < displayList.length; i++) {
+      if (featured && displayList[i] === featured) continue;
+      remaining.push(displayList[i]);
+    }
+
+    var app = document.querySelector(".app");
+    app.className = "app";
+    if (remaining.length >= 6) app.className += " dense";
+    if (remaining.length >= 8) app.className += " extra-dense";
+
+    var html = "";
+
+    for (i = 0; i < remaining.length; i++) {
+      t = remaining[i];
+      var delay = parseInt(t.delayMinutes || 0, 10);
+      var delayText = "À l'heure";
+      var delayClass = "delay";
+
+      if (delay > 0 && delay < 5) {
+        delayText = "+" + delay + " min";
+        delayClass += " warn";
+      } else if (delay >= 5) {
+        delayText = "+" + delay + " min";
+        delayClass += " late";
+      } else if (delay < 0) {
+        delayText = delay + " min";
+      }
+
+      html += '<div class="train">';
+      html +=   '<div class="times">';
+      html +=     '<div class="dep">' + navitiaToTime(t.baseDeparture || t.departure) + '</div>';
+      html +=     '<div class="arrow">→</div>';
+      html +=     '<div class="arr">' + navitiaToTime(t.baseArrival || t.arrival) + '</div>';
+      html +=   '</div>';
+      html +=   '<div class="meta">';
+      html +=     '<div class="line">' + escapeHtml(t.line || t.number || "TER") + '</div>';
+      html +=     '<div class="' + delayClass + '">' + delayText + '</div>';
+      html +=   '</div>';
+      html += '</div>';
+    }
+
+    if (!displayList.length) {
+      html = '<div class="empty">Aucun train trouvé dans cette plage horaire.</div>';
+    }
+
+    document.getElementById("trains").innerHTML = html;
+
+    var d = new Date();
+    setStatus("Dernière mise à jour : " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds()), false);
+  }
+
+  window.loadTrains = function (force) {
+    if (loading) return;
+    loading = true;
+
+    var cfg = modeConfig();
+    document.getElementById("routeTitle").innerHTML = cfg.from + " → " + cfg.to;
+    setStatus("Mise à jour des horaires…", false);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", API_BASE + "/trains?direction=" + encodeURIComponent(cfg.direction) + "&_=" + new Date().getTime(), true);
+    xhr.timeout = 20000;
+
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) return;
+      loading = false;
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          if (data.ok === false) {
+            setStatus("Erreur SNCF : " + escapeHtml(data.error || "inconnue"), true);
+            return;
+          }
+          lastData = data;
+          render(data);
+        } catch (e) {
+          setStatus("Réponse du serveur illisible.", true);
+        }
+      } else {
+        setStatus("Impossible de joindre le serveur (" + xhr.status + ").", true);
+      }
+    };
+
+    xhr.ontimeout = function () {
+      loading = false;
+      setStatus("La connexion a pris trop de temps.", true);
+    };
+
+    xhr.onerror = function () {
+      loading = false;
+      setStatus("Erreur réseau. Nouvelle tentative dans une minute.", true);
+    };
+
+    xhr.send(null);
+  };
+
+
+  function updateDateText() {
+    var d = new Date();
+    var days = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+    var months = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+    document.getElementById("dateText").innerHTML =
+      days[d.getDay()] + " " + d.getDate() + " " + months[d.getMonth()];
+  }
+
+  function weatherLabel(code) {
+    code = parseInt(code, 10);
+    if (code === 0) return { icon: "☀️", text: "Ciel dégagé" };
+    if (code === 1 || code === 2) return { icon: "🌤️", text: "Éclaircies" };
+    if (code === 3) return { icon: "☁️", text: "Couvert" };
+    if (code === 45 || code === 48) return { icon: "🌫️", text: "Brouillard" };
+    if (code === 51 || code === 53 || code === 55 || code === 56 || code === 57) return { icon: "🌦️", text: "Bruine" };
+    if (code === 61 || code === 63 || code === 65 || code === 66 || code === 67) return { icon: "🌧️", text: "Pluie" };
+    if (code === 71 || code === 73 || code === 75 || code === 77) return { icon: "❄️", text: "Neige" };
+    if (code === 80 || code === 81 || code === 82) return { icon: "🌦️", text: "Averses" };
+    if (code === 85 || code === 86) return { icon: "🌨️", text: "Averses de neige" };
+    if (code === 95 || code === 96 || code === 99) return { icon: "⛈️", text: "Orage" };
+    return { icon: "🌡️", text: "Météo actuelle" };
+  }
+
+  function getNextHourRain(data) {
+    try {
+      var hourly = data.hourly;
+      if (!hourly || !hourly.time) return "--";
+      var now = new Date();
+      var best = -1;
+      var i;
+      for (i = 0; i < hourly.time.length; i++) {
+        var t = new Date(hourly.time[i]);
+        if (t >= now) { best = i; break; }
+      }
+      if (best < 0) return "--";
+
+      var prob = hourly.precipitation_probability && hourly.precipitation_probability[best];
+      var rain = hourly.precipitation && hourly.precipitation[best];
+
+      if (prob != null) return Math.round(prob) + "%";
+      if (rain != null) return rain + " mm";
+      return "--";
+    } catch (e) {
+      return "--";
+    }
+  }
+
+  function renderWeather(prefix, data) {
+    if (!data || !data.current_weather) return;
+
+    var cw = data.current_weather;
+    var info = weatherLabel(cw.weathercode);
+    var rain1h = getNextHourRain(data);
+
+    document.getElementById(prefix + "Icon").innerHTML = info.icon;
+    document.getElementById(prefix + "Temp").innerHTML = Math.round(cw.temperature) + "°";
+    document.getElementById(prefix + "Desc").innerHTML = info.text;
+
+    var wind = cw.windspeed != null ? Math.round(cw.windspeed) + " km/h" : "--";
+    document.getElementById(prefix + "Extra").innerHTML =
+      "Vent " + wind + " • Pluie 1 h " + rain1h;
+  }
+
+  function loadWeatherFor(prefix, latitude, longitude, callback) {
+    var weatherUrl =
+      "https://api.open-meteo.com/v1/forecast" +
+      "?latitude=" + encodeURIComponent(latitude) +
+      "&longitude=" + encodeURIComponent(longitude) +
+      "&current_weather=true" +
+      "&hourly=precipitation_probability,precipitation" +
+      "&forecast_days=1" +
+      "&timezone=Europe%2FParis";
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", weatherUrl, true);
+    xhr.timeout = 15000;
+
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) return;
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          renderWeather(prefix, JSON.parse(xhr.responseText));
+        } catch (e) {}
+      }
+      if (callback) callback();
+    };
+
+    xhr.onerror = function () {
+      if (callback) callback();
+    };
+
+    xhr.ontimeout = function () {
+      if (callback) callback();
+    };
+
+    xhr.send(null);
+  }
+
+  function loadWeather() {
+    var done = 0;
+    function finished() {
+      done++;
+      if (done >= 2) {
+        var d = new Date();
+        document.getElementById("weatherUpdated").innerHTML =
+          "Météo actualisée à " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+      }
+    }
+
+    loadWeatherFor("menton", 43.7765, 7.5043, finished);
+    loadWeatherFor("monaco", 43.7384, 7.4246, finished);
+  }
+
+  window.addEventListener("resize", function () {
+    if (lastData) render(lastData);
+  });
+
+  window.addEventListener("orientationchange", function () {
+    setTimeout(function () {
+      if (lastData) render(lastData);
+    }, 300);
+  });
+
+
+  // ----------------------------------------------------
+  // Garde l'écran allumé tant que la PWA/page est visible
+  // ----------------------------------------------------
+  var wakeLock = null;
+
+  async function requestWakeLock() {
+    try {
+      if ("wakeLock" in navigator && document.visibilityState === "visible") {
+        wakeLock = await navigator.wakeLock.request("screen");
+      }
+    } catch (e) {
+      console.log("Wake Lock indisponible :", e);
+    }
+  }
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") {
+      requestWakeLock();
+    } else {
+      wakeLock = null;
+    }
+  });
+
+  requestWakeLock();
+
+  updateClock();
+  updateDateText();
+  setInterval(updateClock, 1000);
+  setInterval(updateDateText, 60000);
+
+  loadWeather();
+  setInterval(loadWeather, 600000);
+
+  loadTrains(true);
+
+  function autoRefreshIfNeeded() {
+    var d = new Date();
+    var minutes = d.getHours() * 60 + d.getMinutes();
+
+    var morningWindow = minutes >= 7 * 60 && minutes < 9 * 60;
+    var eveningWindow = minutes >= 17 * 60 && minutes < 20 * 60;
+
+    if (morningWindow || eveningWindow) {
+      loadTrains(false);
+    }
+  }
+
+  setInterval(autoRefreshIfNeeded, 60000);
+
+  /* Sur les navigateurs récents, enregistre le service worker.
+     Sur un ancien iPad, l'application reste utilisable sans lui. */
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js");
+  }
+})();
+</script>
+</body>
+</html>

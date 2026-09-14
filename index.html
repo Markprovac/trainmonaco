@@ -316,12 +316,6 @@
       margin-bottom: 0;
     }
 
-    .more {
-      text-align: center;
-      color: #a9bdcc;
-      font-size: 13px;
-      padding: 3px 0 0;
-    }
 
     /* Tablettes et téléphones en paysage : 2 colonnes pour les trains */
     @media (orientation: landscape) and (min-width: 700px) {
@@ -418,6 +412,149 @@
       .arr { font-size: 21px; }
     }
 
+  
+    .next-train-card {
+      background: #ffffff;
+      color: #07131f;
+      border-radius: 14px;
+      padding: 10px 14px;
+      margin-bottom: 6px;
+      border-left: 7px solid #55d98a;
+      flex: 0 0 auto;
+    }
+
+    .next-label {
+      font-size: 12px;
+      font-weight: 800;
+      color: #2c6c46;
+      letter-spacing: .7px;
+      margin-bottom: 2px;
+    }
+
+    .next-main {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-align-items: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .next-time {
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .next-arrow {
+      font-size: 24px;
+      color: #647789;
+    }
+
+    .next-arrival {
+      font-size: 27px;
+      font-weight: 700;
+      color: #30485c;
+    }
+
+    .next-meta {
+      margin-left: auto;
+      text-align: right;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .next-delay {
+      display: inline-block;
+      margin-top: 3px;
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: #dff4e5;
+      color: #15652b;
+    }
+
+    .next-delay.warn {
+      background: #fff0c2;
+      color: #795b00;
+    }
+
+    .next-delay.late {
+      background: #ffe2d8;
+      color: #9e2c0d;
+    }
+
+    /* Les autres trains sont une liste compacte qui s'adapte au nombre */
+    #trains {
+      grid-auto-rows: minmax(34px, auto);
+    }
+
+    #trains .train {
+      min-height: 0;
+      padding: 5px 8px;
+    }
+
+    #trains .dep { font-size: 24px; }
+    #trains .arr { font-size: 17px; }
+    #trains .arrow { font-size: 14px; }
+    #trains .line { font-size: 11px; }
+    #trains .delay { font-size: 9px; padding: 2px 5px; }
+
+    .app.dense .weather-card { padding-top: 6px; padding-bottom: 6px; }
+    .app.dense .weather-main { margin: 1px 0; }
+    .app.dense .weather-icon { font-size: 23px; }
+    .app.dense .weather-temp { font-size: 27px; }
+    .app.dense .weather-desc { font-size: 11px; }
+    .app.dense .weather-extra { font-size: 9px; }
+    .app.dense .route-card { padding-top: 5px; padding-bottom: 5px; }
+    .app.dense .route { font-size: 16px; }
+    .app.dense .subline { font-size: 9px; }
+    .app.dense .toolbar button { padding: 5px 7px; font-size: 10px; }
+    .app.dense .status { padding: 4px 6px; font-size: 9px; }
+    .app.dense .next-train-card { padding: 7px 10px; }
+    .app.dense .next-time { font-size: 34px; }
+    .app.dense .next-arrival { font-size: 22px; }
+    .app.dense #trains .train { padding: 4px 6px; }
+    .app.dense #trains .dep { font-size: 20px; }
+    .app.dense #trains .arr { font-size: 14px; }
+
+    .app.extra-dense .weather-updated { display:none; }
+    .app.extra-dense .subline { display:none; }
+    .app.extra-dense .footer { display:none; }
+    .app.extra-dense .weather-extra { display:none; }
+    .app.extra-dense .route-card { margin-bottom: 3px; }
+    .app.extra-dense .toolbar { margin: 2px 0 3px; }
+    .app.extra-dense .next-label { font-size: 9px; }
+    .app.extra-dense .next-time { font-size: 30px; }
+    .app.extra-dense .next-arrival { font-size: 19px; }
+
+    @media (orientation: landscape) and (min-width: 700px) {
+      .next-train-card {
+        margin-bottom: 4px;
+      }
+
+      #trains {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .next-time { font-size: 36px; }
+      .next-arrival { font-size: 23px; }
+    }
+
+    @media (max-width: 699px) {
+      .next-train-card { padding: 8px 10px; border-left-width: 5px; }
+      .next-label { font-size: 10px; }
+      .next-time { font-size: 34px; }
+      .next-arrival { font-size: 21px; }
+      .next-meta { font-size: 11px; }
+    }
+
+    @media (orientation: landscape) and (max-height: 500px) {
+      .next-train-card { padding: 5px 8px; }
+      .next-label { display:none; }
+      .next-time { font-size: 28px; }
+      .next-arrival { font-size: 18px; }
+      .next-meta { font-size: 10px; }
+    }
+
   </style>
 </head>
 <body>
@@ -467,10 +604,24 @@
     </div>
 
     <div class="status" id="status">Connexion au service SNCF…</div>
+
+    <div id="nextTrainCard" class="next-train-card" style="display:none;">
+      <div class="next-label">PROCHAIN TRAIN</div>
+      <div class="next-main">
+        <div class="next-time" id="nextDep">--:--</div>
+        <div class="next-arrow">→</div>
+        <div class="next-arrival" id="nextArr">--:--</div>
+        <div class="next-meta">
+          <div id="nextLine">TER</div>
+          <div id="nextDelay" class="next-delay">À l'heure</div>
+        </div>
+      </div>
+    </div>
+
     <div id="trains"></div>
 
     <div class="footer">
-      Données SNCF • Auto : 07:00–09:00 et 17:00–20:00
+      Données SNCF • prochain train en grand • mise à jour automatique
     </div>
   </div>
 
@@ -592,24 +743,70 @@
       }
     }
 
-    var html = "";
+    /* Pendant la plage active, on retire les trains déjà partis.
+       En dehors de la plage (par ex. test manuel à midi), on conserve toute la plage. */
+    var inActiveWindow = now >= cfg.start && now <= cfg.end;
+    var displayList = list;
 
-    var maxVisible = 8;
-    var vw = window.innerWidth || document.documentElement.clientWidth || 1024;
-    var vh = window.innerHeight || document.documentElement.clientHeight || 768;
-
-    if (vw < 700 && vh < 700) {
-      maxVisible = 5;
-    } else if (vw < 700) {
-      maxVisible = 6;
-    } else if (vh < 600) {
-      maxVisible = 6;
+    if (inActiveWindow && nextIndex >= 0) {
+      displayList = list.slice(nextIndex);
+      nextIndex = 0;
     }
 
-    var visibleList = list.slice(0, maxVisible);
+    /* Le premier train à venir devient la grande vignette. */
+    var featured = null;
+    if (displayList.length) {
+      if (inActiveWindow) {
+        featured = displayList[0];
+      } else if (nextIndex >= 0 && nextIndex < list.length) {
+        featured = list[nextIndex];
+      } else {
+        featured = displayList[0];
+      }
+    }
 
-    for (i = 0; i < visibleList.length; i++) {
-      t = visibleList[i];
+    var card = document.getElementById("nextTrainCard");
+    if (featured) {
+      var fDelay = parseInt(featured.delayMinutes || 0, 10);
+      var fText = "À l'heure";
+      var fClass = "next-delay";
+
+      if (fDelay > 0 && fDelay < 5) {
+        fText = "+" + fDelay + " min";
+        fClass += " warn";
+      } else if (fDelay >= 5) {
+        fText = "+" + fDelay + " min";
+        fClass += " late";
+      } else if (fDelay < 0) {
+        fText = fDelay + " min";
+      }
+
+      document.getElementById("nextDep").innerHTML = navitiaToTime(featured.departure);
+      document.getElementById("nextArr").innerHTML = navitiaToTime(featured.arrival);
+      document.getElementById("nextLine").innerHTML = escapeHtml(featured.line || featured.number || "TER");
+      document.getElementById("nextDelay").innerHTML = fText;
+      document.getElementById("nextDelay").className = fClass;
+      card.style.display = "block";
+    } else {
+      card.style.display = "none";
+    }
+
+    /* On affiche TOUS les autres trains. Aucun n'est volontairement masqué. */
+    var remaining = [];
+    for (i = 0; i < displayList.length; i++) {
+      if (featured && displayList[i] === featured) continue;
+      remaining.push(displayList[i]);
+    }
+
+    var app = document.querySelector(".app");
+    app.className = "app";
+    if (remaining.length >= 6) app.className += " dense";
+    if (remaining.length >= 8) app.className += " extra-dense";
+
+    var html = "";
+
+    for (i = 0; i < remaining.length; i++) {
+      t = remaining[i];
       var delay = parseInt(t.delayMinutes || 0, 10);
       var delayText = "À l'heure";
       var delayClass = "delay";
@@ -624,10 +821,7 @@
         delayText = delay + " min";
       }
 
-      var trainClass = "train";
-      if (i === nextIndex) trainClass += " next";
-
-      html += '<div class="' + trainClass + '">';
+      html += '<div class="train">';
       html +=   '<div class="times">';
       html +=     '<div class="dep">' + navitiaToTime(t.departure) + '</div>';
       html +=     '<div class="arrow">→</div>';
@@ -640,10 +834,8 @@
       html += '</div>';
     }
 
-    if (!list.length) {
+    if (!displayList.length) {
       html = '<div class="empty">Aucun train trouvé dans cette plage horaire.</div>';
-    } else if (list.length > visibleList.length) {
-      html += '<div class="more">+' + (list.length - visibleList.length) + ' autre(s) train(s) dans la plage</div>';
     }
 
     document.getElementById("trains").innerHTML = html;

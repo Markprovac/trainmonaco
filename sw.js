@@ -1,4 +1,4 @@
-var CACHE_NAME = "train-monaco-v13-scroll";
+var CACHE_NAME = "train-monaco-v14-realtime-nocache";
 var APP_SHELL = [
   "./",
   "./index.html",
@@ -29,7 +29,15 @@ self.addEventListener("fetch", function(event) {
   var url = event.request.url;
 
   if (url.indexOf("trainmonaco.markrusten-e08.workers.dev") !== -1) {
-    event.respondWith(fetch(event.request));
+    event.respondWith(fetch(event.request, { cache: "no-store" }));
+    return;
+  }
+
+  // Donnees meteo : toujours reseau, jamais le cache.
+  if (url.indexOf("api.open-meteo.com") !== -1 ||
+      url.indexOf("openweathermap.org") !== -1 ||
+      url.indexOf("weatherapi.com") !== -1) {
+    event.respondWith(fetch(event.request, { cache: "no-store" }));
     return;
   }
 

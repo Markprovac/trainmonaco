@@ -1103,8 +1103,19 @@
     setStatus("Mise à jour des horaires…", false);
 
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", API_BASE + "/trains?direction=" + encodeURIComponent(cfg.direction) + "&_=" + new Date().getTime(), true);
+    var requestUrl =
+      API_BASE + "/trains?direction=" + encodeURIComponent(cfg.direction) +
+      "&_=" + new Date().getTime() +
+      "&refresh=" + Math.random().toString(36).slice(2);
+
+    xhr.open("GET", requestUrl, true);
     xhr.timeout = 20000;
+
+    // Demande explicitement une réponse fraîche au Worker/proxy.
+    try {
+      xhr.setRequestHeader("Cache-Control", "no-cache, no-store, max-age=0");
+      xhr.setRequestHeader("Pragma", "no-cache");
+    } catch (e) {}
 
     xhr.onreadystatechange = function () {
       if (xhr.readyState !== 4) return;
@@ -1283,6 +1294,17 @@
   document.addEventListener("visibilitychange", function () {
     if (document.visibilityState === "visible") {
       requestWakeLock();
+
+      // Android/iOS peuvent suspendre les timers en arrière-plan.
+      // Dès que la PWA revient au premier plan, on récupère immédiatement
+      // les dernières données si nous sommes dans une plage active.
+      var d = new Date();
+      var minutes = d.getHours() * 60 + d.getMinutes();
+      var morningWindow = minutes >= 7 * 60 && minutes < 9 * 60;
+      var eveningWindow = minutes >= 17 * 60 && minutes < 22 * 60 + 30;
+      if (morningWindow || eveningWindow) {
+        loadTrains(true);
+      }
     } else {
       wakeLock = null;
     }
@@ -1308,7 +1330,8 @@
     var eveningWindow = minutes >= 17 * 60 && minutes < 22 * 60 + 30;
 
     if (morningWindow || eveningWindow) {
-      loadTrains(false);
+      // Même actualisation forcée que le bouton "Actualiser".
+      loadTrains(true);
     }
   }
 

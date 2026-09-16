@@ -1111,12 +1111,6 @@
     xhr.open("GET", requestUrl, true);
     xhr.timeout = 20000;
 
-    // Demande explicitement une réponse fraîche au Worker/proxy.
-    try {
-      xhr.setRequestHeader("Cache-Control", "no-cache, no-store, max-age=0");
-      xhr.setRequestHeader("Pragma", "no-cache");
-    } catch (e) {}
-
     xhr.onreadystatechange = function () {
       if (xhr.readyState !== 4) return;
       loading = false;
@@ -1281,14 +1275,20 @@
   // ----------------------------------------------------
   var wakeLock = null;
 
-  async function requestWakeLock() {
+  function requestWakeLock() {
     try {
-      if ("wakeLock" in navigator && document.visibilityState === "visible") {
-        wakeLock = await navigator.wakeLock.request("screen");
+      if ("wakeLock" in navigator &&
+          navigator.wakeLock &&
+          navigator.wakeLock.request &&
+          document.visibilityState === "visible") {
+        var p = navigator.wakeLock.request("screen");
+        if (p && typeof p.then === "function") {
+          p.then(function (lock) {
+            wakeLock = lock;
+          }).catch(function () {});
+        }
       }
-    } catch (e) {
-      console.log("Wake Lock indisponible :", e);
-    }
+    } catch (e) {}
   }
 
   document.addEventListener("visibilitychange", function () {

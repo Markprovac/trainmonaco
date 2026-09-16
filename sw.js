@@ -1,4 +1,4 @@
-var CACHE_NAME = "train-monaco-v20-realtime-nocache";
+var CACHE_NAME = "train-monaco-v21-realtime-nocache";
 var APP_SHELL = [
   "./",
   "./index.html",

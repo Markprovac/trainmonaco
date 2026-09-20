@@ -1,4 +1,4 @@
-var CACHE_NAME = "train-monaco-v26";
+var CACHE_NAME = "train-monaco-v27";
 var APP_SHELL = [
   "./",
   "./index.html",
